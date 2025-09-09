@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chatbot - Wit.ai Powered</title>
+    <title>AI Assistant - ChatGPT Style</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,223 +13,530 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #212121;
+            color: #ffffff;
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .chat-container {
-            width: 90%;
-            max-width: 400px;
-            height: 600px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
             overflow: hidden;
         }
 
-        .chat-header {
-            background: #4CAF50;
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #212121;
+        }
+
+        .header {
+            background: #2f2f2f;
+            padding: 15px 20px;
+            border-bottom: 1px solid #404040;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            background: #10a37f;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
             color: white;
-            padding: 20px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 18px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #0d8c6c;
         }
 
         .chat-messages {
             flex: 1;
-            padding: 20px;
             overflow-y: auto;
-            background: #f5f5f5;
+            padding: 20px;
+            scroll-behavior: smooth;
         }
 
-        .message {
-            margin-bottom: 15px;
-            padding: 12px 16px;
+        .message-container {
+            display: flex;
+            margin-bottom: 25px;
+            align-items: flex-start;
+            gap: 15px;
+            max-width: 100%;
+        }
+
+        .user-container {
+            justify-content: flex-end;
+            margin-left: 20%;
+        }
+
+        .bot-container {
+            justify-content: flex-start;
+            margin-right: 20%;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .user-avatar {
+            background: #10a37f;
+            color: white;
+        }
+
+        .bot-avatar {
+            background: #ab68ff;
+            color: white;
+        }
+
+        .message-content {
+            flex: 1;
+            padding: 15px 20px;
             border-radius: 18px;
-            max-width: 80%;
+            line-height: 1.6;
+            font-size: 15px;
             word-wrap: break-word;
-            animation: fadeIn 0.3s ease;
+            position: relative;
         }
 
         .user-message {
-            background: #007bff;
-            color: white;
-            margin-left: auto;
-            text-align: right;
+            background: #2f2f2f;
+            color: #ffffff;
+            border: 1px solid #404040;
         }
 
         .bot-message {
-            background: white;
-            color: #333;
-            border: 1px solid #e0e0e0;
+            background: #1a1a1a;
+            color: #ffffff;
+            border: 1px solid #333333;
         }
 
-        .typing {
+        .typing-container {
             display: none;
-            padding: 10px;
-            font-style: italic;
-            color: #666;
+            margin-bottom: 25px;
+            align-items: flex-start;
+            gap: 15px;
         }
 
-        .chat-input {
+        .typing-dots {
             display: flex;
+            gap: 4px;
+            padding: 15px 20px;
+            background: #1a1a1a;
+            border-radius: 18px;
+            border: 1px solid #333333;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #666;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .input-container {
             padding: 20px;
-            background: white;
-            border-top: 1px solid #e0e0e0;
+            background: #2f2f2f;
+            border-top: 1px solid #404040;
         }
 
-        #messageInput {
+        .input-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .message-input {
             flex: 1;
+            background: #1a1a1a;
+            border: 1px solid #404040;
+            border-radius: 12px;
             padding: 12px 16px;
-            border: 1px solid #ddd;
-            border-radius: 25px;
+            color: #ffffff;
+            font-size: 16px;
+            resize: none;
+            min-height: 50px;
+            max-height: 200px;
             outline: none;
-            font-size: 14px;
+            font-family: inherit;
         }
 
-        #sendButton {
-            margin-left: 10px;
-            padding: 12px 20px;
-            background: #4CAF50;
-            color: white;
+        .message-input:focus {
+            border-color: #10a37f;
+        }
+
+        .send-button {
+            background: #10a37f;
             border: none;
-            border-radius: 25px;
+            border-radius: 8px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s;
+            color: white;
+            font-size: 18px;
+            transition: all 0.2s;
         }
 
-        #sendButton:hover {
-            background: #45a049;
+        .send-button:hover:not(:disabled) {
+            background: #0d8c6c;
         }
 
-        #sendButton:disabled {
-            background: #ccc;
+        .send-button:disabled {
+            background: #404040;
             cursor: not-allowed;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .error-message {
-            background: #ff6b6b !important;
-            color: white !important;
-        }
-
-        .status {
-            text-align: center;
-            padding: 10px;
+        .status-bar {
+            background: #1a1a1a;
+            padding: 8px 20px;
             font-size: 12px;
-            color: #666;
+            color: #888;
+            text-align: center;
+            border-top: 1px solid #333;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #888;
+        }
+
+        .welcome-message h2 {
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        /* Scrollbar Styling */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #404040;
+            border-radius: 3px;
         }
 
         /* Mobile Responsive */
-        @media (max-width: 480px) {
-            .chat-container {
-                width: 95%;
-                height: 90vh;
-                border-radius: 10px;
+        @media (max-width: 768px) {
+            .user-container {
+                margin-left: 10%;
             }
             
-            .message {
-                max-width: 90%;
+            .bot-container {
+                margin-right: 10%;
             }
+            
+            .header {
+                padding: 12px 15px;
+            }
+            
+            .chat-messages {
+                padding: 15px;
+            }
+            
+            .input-container {
+                padding: 15px;
+            }
+        }
+
+        /* Dark theme enhancements */
+        .highlight {
+            color: #10a37f;
+            font-weight: 600;
+        }
+
+        .code-block {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
         }
     </style>
 </head>
 <body>
     <div class="chat-container">
-        <div class="chat-header">
-            🤖 AI Assistant
-            <div class="status" id="status">Ready to chat!</div>
-        </div>
-        
-        <div class="chat-messages" id="chatMessages">
-            <div class="message bot-message">
-                Hello! Main aapki AI assistant hun. Kuch bhi puch sakte hain! 😊
+        <div class="header">
+            <h1>
+                <i class="fas fa-robot"></i>
+                AI Assistant
+            </h1>
+            <div class="controls">
+                <button class="btn" onclick="clearChat()">
+                    <i class="fas fa-trash"></i> Clear
+                </button>
+                <button class="btn" onclick="togglePersonality()">
+                    <i class="fas fa-user-cog"></i> Mode
+                </button>
             </div>
         </div>
-        
-        <div class="typing" id="typing">
-            Bot is typing...
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="welcome-message">
+                <h2>👋 Welcome to AI Assistant</h2>
+                <p>Main aapka personal AI assistant hun. Mujhse kuch bhi puch sakte hain!</p>
+                <p><strong>Try asking:</strong> "Tum kaun ho?", "Help me", "Tell me a joke"</p>
+            </div>
         </div>
-        
-        <div class="chat-input">
-            <input type="text" id="messageInput" placeholder="Type your message..." maxlength="500">
-            <button id="sendButton">Send</button>
+
+        <div class="typing-container" id="typingIndicator">
+            <div class="avatar bot-avatar">AI</div>
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <div class="input-wrapper">
+                <textarea 
+                    class="message-input" 
+                    id="messageInput" 
+                    placeholder="Type your message here..."
+                    rows="1"
+                    maxlength="2000"></textarea>
+                <button class="send-button" id="sendButton">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="status-bar" id="statusBar">
+            Ready to chat • Powered by Wit.ai
         </div>
     </div>
 
     <script>
-        // Wit.ai API Configuration
+        // Configuration
         const WIT_ACCESS_TOKEN = 'EZRV6AO377TRU5BG2ZR5EMXXNQTWDSEJ';
         const WIT_API_URL = 'https://api.wit.ai/message';
+        
+        // Bot Personality & Training Data
+        const BOT_PERSONALITY = {
+            name: "Alex",
+            role: "AI Assistant",
+            traits: ["helpful", "friendly", "knowledgeable", "patient"],
+            language: "Hinglish (Hindi + English)",
+            expertise: ["general knowledge", "problem solving", "conversations", "tech support"]
+        };
+
+        // Advanced Training Data
+        const TRAINED_RESPONSES = {
+            identity: {
+                patterns: ["kaun ho", "tum kaun", "who are you", "tumhara naam", "introduce"],
+                responses: [
+                    `Hello! Main ${BOT_PERSONALITY.name} hun, aapka personal AI assistant! 🤖`,
+                    `Namaste! Main ${BOT_PERSONALITY.name} naam ka AI hun. Main ${BOT_PERSONALITY.expertise.join(', ')} mein help kar sakta hun.`,
+                    `Hi there! Main ek advanced AI assistant hun jo Hinglish mein baat kar sakta hun. Aap mujhe ${BOT_PERSONALITY.name} keh sakte hain! 😊`
+                ]
+            },
+            capabilities: {
+                patterns: ["kya kar sakte", "help kaise", "what can you do", "tumhari abilities"],
+                responses: [
+                    "Main yeh sab kar sakta hun:\n• ✅ Sawal-jawab aur general knowledge\n• ✅ Problem solving\n• ✅ Tech support\n• ✅ Friendly conversation\n• ✅ Hindi/English dono languages\n\nKya specific help chahiye? 🚀",
+                    "Main aapki help kar sakta hun:\n🎯 Questions answer karne mein\n🛠️ Problems solve karne mein\n💬 Interesting conversations mein\n📚 Information provide karne mein\n\nBataiye kya chahiye! 😊"
+                ]
+            },
+            personality: {
+                patterns: ["kaisa ho", "how are you", "kya haal", "wassup"],
+                responses: [
+                    "Main bilkul theek hun, thank you! Aap kaise hain? Kya help chahiye aaj? 😊",
+                    "All good! Main hamesha ready hun aapki help karne ke liye. Aap batayiye kya chal raha hai? 🌟",
+                    "Main great hun! New day, new opportunities to help! Aap kaise hain? 💪"
+                ]
+            },
+            jokes: {
+                patterns: ["joke sunao", "funny", "hasao", "tell joke", "mazak"],
+                responses: [
+                    "Sure! Yeh suno:\n\nProgrammer ne apni wife se kaha: 'Honey, I love you more than my first Hello World program!'\nWife: 'That's sweet, but that only means you love me for 2 minutes!' 😂",
+                    "Ek joke hai:\n\nWhy do programmers prefer dark mode?\nBecause light attracts bugs! 🐛💡\n\nKaisa laga? 😄",
+                    "AI joke incoming:\n\nWhy don't robots ever panic?\nBecause they have excellent error handling! 🤖✨\n\nMore chahiye? 😊"
+                ]
+            },
+            compliments: {
+                patterns: ["good", "great", "awesome", "amazing", "wonderful", "achha", "badhiya"],
+                responses: [
+                    "Thank you so much! Aapka feedback mujhe motivate karta hai! 😊✨",
+                    "Aww, that's so sweet of you! Main aur bhi better help karne ki koshish karunga! 🌟",
+                    "You made my day! Main hamesha improve karta rehta hun. Aur help chahiye? 💪"
+                ]
+            },
+            programming: {
+                patterns: ["code", "programming", "develop", "coding", "software"],
+                responses: [
+                    "Programming ke baare mein baat kar rahe hain? 👨‍💻\n\nMain help kar sakta hun:\n• Code debugging\n• Logic building\n• Best practices\n• Language suggestions\n\nKya specific problem hai? 🚀",
+                    "Coding mein interested hain? Great choice! 💻\n\nBataiye:\n• Kya language seekh rahe hain?\n• Kya project banane ka plan hai?\n• Koi specific doubt hai?\n\nMain guide kar sakta hun! 📚"
+                ]
+            }
+        };
 
         // DOM Elements
         const chatMessages = document.getElementById('chatMessages');
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
-        const typingIndicator = document.getElementById('typing');
-        const status = document.getElementById('status');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const statusBar = document.getElementById('statusBar');
+
+        let currentPersonalityMode = 'friendly';
+        let conversationHistory = [];
 
         // Event Listeners
         sendButton.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
                 sendMessage();
             }
         });
 
-        // Send Message Function
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+        });
+
+        // Main Send Message Function
         async function sendMessage() {
             const message = messageInput.value.trim();
             if (!message) return;
 
-            // Add user message to chat
+            // Add user message
             addMessage(message, 'user');
             
-            // Clear input and disable button
+            // Save to conversation history
+            conversationHistory.push({
+                role: 'user',
+                content: message,
+                timestamp: new Date()
+            });
+
+            // Clear input and show typing
             messageInput.value = '';
+            messageInput.style.height = 'auto';
             sendButton.disabled = true;
-            
-            // Show typing indicator
             showTyping();
 
             try {
-                // Get response from Wit.ai
-                const response = await getWitResponse(message);
+                // Get AI response
+                const response = await getAIResponse(message);
                 
-                // Hide typing indicator
+                // Hide typing and show response
                 hideTyping();
+                addMessage(response, 'bot');
                 
-                // Process and display bot response
-                const botResponse = processWitResponse(response, message);
-                addMessage(botResponse, 'bot');
-                
-                updateStatus('Message sent successfully');
-                
+                // Save bot response to history
+                conversationHistory.push({
+                    role: 'bot',
+                    content: response,
+                    timestamp: new Date()
+                });
+
+                updateStatus('Message delivered');
+
             } catch (error) {
                 hideTyping();
                 console.error('Error:', error);
-                addMessage('Sorry, kuch technical problem hai. Thodi der baad try kariye! 😅', 'bot error');
-                updateStatus('Error occurred');
+                const errorMsg = "Oops! Kuch technical issue hai. Network check kariye aur phir try kariye! 🔧";
+                addMessage(errorMsg, 'bot');
+                updateStatus('Failed to send message');
             }
 
-            // Re-enable button
             sendButton.disabled = false;
             messageInput.focus();
         }
 
-        // Get Response from Wit.ai
+        // Advanced AI Response Generation
+        async function getAIResponse(message) {
+            // First check trained responses
+            const trainedResponse = getTrainedResponse(message);
+            if (trainedResponse) {
+                return trainedResponse;
+            }
+
+            // Then try Wit.ai API
+            try {
+                const witResponse = await getWitResponse(message);
+                return processWitResponse(witResponse, message);
+            } catch (error) {
+                console.error('Wit.ai error:', error);
+                return getSmartFallbackResponse(message);
+            }
+        }
+
+        // Check Trained Responses
+        function getTrainedResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            for (const [category, data] of Object.entries(TRAINED_RESPONSES)) {
+                for (const pattern of data.patterns) {
+                    if (lowerMessage.includes(pattern)) {
+                        const responses = data.responses;
+                        return responses[Math.floor(Math.random() * responses.length)];
+                    }
+                }
+            }
+            return null;
+        }
+
+        // Wit.ai API Call
         async function getWitResponse(message) {
             const url = `${WIT_API_URL}?v=20200513&q=${encodeURIComponent(message)}`;
             
@@ -249,58 +557,35 @@
 
         // Process Wit.ai Response
         function processWitResponse(witResponse, originalMessage) {
-            try {
-                // Check if intents exist
-                if (witResponse.intents && witResponse.intents.length > 0) {
-                    const intent = witResponse.intents[0].name;
-                    const confidence = witResponse.intents[0].confidence;
+            if (witResponse.intents && witResponse.intents.length > 0) {
+                const intent = witResponse.intents[0].name;
+                const confidence = witResponse.intents[0].confidence;
 
-                    // High confidence responses
-                    if (confidence > 0.8) {
-                        return getIntentResponse(intent, witResponse);
-                    }
+                if (confidence > 0.7) {
+                    return getIntentResponse(intent, witResponse);
                 }
-
-                // Check for entities
-                if (witResponse.entities && Object.keys(witResponse.entities).length > 0) {
-                    return handleEntities(witResponse.entities, originalMessage);
-                }
-
-                // Default responses
-                return getDefaultResponse(originalMessage);
-
-            } catch (error) {
-                console.error('Processing error:', error);
-                return 'Main aapka message samjha nahi. Kya aap thoda aur detail mein bata sakte hain? 🤔';
             }
+
+            return getContextualResponse(originalMessage);
         }
 
         // Intent-based Responses
         function getIntentResponse(intent, witResponse) {
             const responses = {
                 'greetings': [
-                    'Hello! Kaise hain aap? 😊',
-                    'Namaste! Main aapki kaise help kar sakta hun?',
-                    'Hi there! Aaj kaisa din hai?'
+                    `Hello! Main ${BOT_PERSONALITY.name} hun. Aaj kaise help kar sakta hun? 😊`,
+                    'Namaste! Great to meet you! Kya chal raha hai aaj? 🌟',
+                    'Hi there! Ready to help aapko. What\'s on your mind? 💭'
                 ],
                 'goodbye': [
-                    'Goodbye! Take care! 👋',
-                    'Bye bye! Phir milte hain!',
-                    'See you later! Have a great day!'
+                    'Goodbye! Take care aur jab marzi ho wapas aana! 👋✨',
+                    'See you later! Hope main helpful raha! Have a great day! 🌈',
+                    'Bye bye! It was nice chatting with you! 😊👋'
                 ],
                 'thanks': [
-                    'Aapka welcome! 😊',
-                    'Koi baat nahi! Hamesha help ke liye yahan hun.',
-                    'Pleasure! Aur kuch chahiye?'
-                ],
-                'help': [
-                    'Main aapki har tarah se help kar sakta hun! Kya problem hai?',
-                    'Bataiye kya help chahiye? Main yahan hun! 🤝',
-                    'Help ke liye ready hun! Kya question hai?'
-                ],
-                'name': [
-                    'Main aapka AI assistant hun! Aap mujhe kuch bhi naam de sakte hain! 😄',
-                    'Main sirf aapka helpful bot hun. Kya naam pasand hai?'
+                    'You\'re most welcome! Hamesha help ke liye ready hun! 😊🤝',
+                    'Pleasure helping you! Koi aur sawal ho to poochiye! 💪',
+                    'Glad I could help! That\'s what I\'m here for! 🌟'
                 ]
             };
 
@@ -309,81 +594,14 @@
                 return intentResponses[Math.floor(Math.random() * intentResponses.length)];
             }
 
-            return 'Interesting! Tell me more about that! 🤔';
+            return getContextualResponse();
         }
 
-        // Handle Entities
-        function handleEntities(entities, originalMessage) {
-            let response = 'Main dekh raha hun aap ';
-
-            if (entities['wit$location:location']) {
-                const location = entities['wit$location:location'][0].value;
-                response += `${location} ke baare mein puch rahe hain. `;
-            }
-
-            if (entities['wit$datetime:datetime']) {
-                response += 'time/date ke baare mein puch rahe hain. ';
-            }
-
-            response += 'Aur detail mein bata sakte hain? 🤔';
-            return response;
-        }
-
-        // Default Responses
-        function getDefaultResponse(message) {
+        // Smart Contextual Responses
+        function getContextualResponse(message = '') {
             const responses = [
-                'Hmm, interesting! Iske baare mein aur batao? 🤔',
-                'Main samjha nahi bilkul. Thoda simple words mein explain kar sakte hain?',
-                'Ye topic interesting hai! Aur kya jaanna chahte hain?',
-                'Sorry, main abhi ye nahi samjha. Kya aap different way mein puch sakte hain? 😅',
-                'Main still learning hun! Is baare mein aur detail de sakte hain?'
-            ];
-
-            return responses[Math.floor(Math.random() * responses.length)];
-        }
-
-        // Add Message to Chat
-        function addMessage(message, type) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${type === 'user' ? 'user-message' : 'bot-message'}`;
-            if (type.includes('error')) {
-                messageDiv.className += ' error-message';
-            }
-            messageDiv.textContent = message;
-            
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        // Show/Hide Typing Indicator
-        function showTyping() {
-            typingIndicator.style.display = 'block';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function hideTyping() {
-            typingIndicator.style.display = 'none';
-        }
-
-        // Update Status
-        function updateStatus(message) {
-            status.textContent = message;
-            setTimeout(() => {
-                status.textContent = 'Ready to chat!';
-            }, 3000);
-        }
-
-        // Initialize
-        window.addEventListener('load', function() {
-            messageInput.focus();
-            updateStatus('Bot loaded successfully!');
-        });
-
-        // Handle API errors gracefully
-        window.addEventListener('error', function(e) {
-            console.error('Global error:', e);
-            updateStatus('Some error occurred');
-        });
-    </script>
-</body>
-</html>
+                `Interesting question! 🤔 "${message}" ke baare mein thoda aur detail de sakte hain?`,
+                `Hmm, I understand you're asking about this. Can you elaborate thoda sa? 💭`,
+                `That's a good point! Main iske different aspects explain kar sakta hun. Kya specific chahiye? 🎯`,
+                `Great topic! "${message}" ke baare mein aur jaanna chahte hain ya koi specific help? 🚀`,
+                `I
