@@ -597,11 +597,96 @@
             return getContextualResponse();
         }
 
-        // Smart Contextual Responses
+          // Smart Contextual Responses
         function getContextualResponse(message = '') {
             const responses = [
                 `Interesting question! 🤔 "${message}" ke baare mein thoda aur detail de sakte hain?`,
                 `Hmm, I understand you're asking about this. Can you elaborate thoda sa? 💭`,
                 `That's a good point! Main iske different aspects explain kar sakta hun. Kya specific chahiye? 🎯`,
                 `Great topic! "${message}" ke baare mein aur jaanna chahte hain ya koi specific help? 🚀`,
-                `I
+                `I see what you mean! Is topic par main kuch suggestions de sakta hun. Batayiye kya important hai? ✨`
+            ];
+
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        // Smart Fallback Response
+        function getSmartFallbackResponse(message) {
+            return `I'm processing your message: "${message}"\n\nMain samjhane ki koshish kar raha hun, but network issue lag raha hai. Kya aap thoda simple words mein explain kar sakte hain? 🤔💻`;
+        }
+
+        // UI Functions
+        function addMessage(content, type) {
+            const container = document.createElement('div');
+            container.className = `message-container ${type}-container`;
+
+            const avatar = document.createElement('div');
+            avatar.className = `avatar ${type}-avatar`;
+            avatar.textContent = type === 'user' ? 'U' : 'AI';
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message-content ${type}-message`;
+            messageDiv.textContent = content;
+
+            if (type === 'user') {
+                container.appendChild(messageDiv);
+                container.appendChild(avatar);
+            } else {
+                container.appendChild(avatar);
+                container.appendChild(messageDiv);
+            }
+
+            chatMessages.appendChild(container);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Remove welcome message after first interaction
+            const welcomeMsg = chatMessages.querySelector('.welcome-message');
+            if (welcomeMsg) {
+                welcomeMsg.remove();
+            }
+        }
+
+        function showTyping() {
+            typingIndicator.style.display = 'flex';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+        }
+
+        function updateStatus(message) {
+            statusBar.textContent = message + ' • Powered by Wit.ai';
+            setTimeout(() => {
+                statusBar.textContent = 'Ready to chat • Powered by Wit.ai';
+            }, 3000);
+        }
+
+        // Additional Features
+        function clearChat() {
+            chatMessages.innerHTML = `
+                <div class="welcome-message">
+                    <h2>👋 Chat Cleared!</h2>
+                    <p>Fresh start! Kya help chahiye? 😊</p>
+                </div>
+            `;
+            conversationHistory = [];
+            updateStatus('Chat cleared');
+        }
+
+        function togglePersonality() {
+            const modes = ['friendly', 'professional', 'casual'];
+            const currentIndex = modes.indexOf(currentPersonalityMode);
+            currentPersonalityMode = modes[(currentIndex + 1) % modes.length];
+            
+            updateStatus(`Mode changed to: ${currentPersonalityMode}`);
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            messageInput.focus();
+            updateStatus('AI Assistant ready!');
+        });
+    </script>
+</body>
+</html>
