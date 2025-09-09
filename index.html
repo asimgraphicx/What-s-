@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot - Wit.ai Powered</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 400px;
+            height: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: #4CAF50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f5f5f5;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .user-message {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .bot-message {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+
+        .typing {
+            display: none;
+            padding: 10px;
+            font-style: italic;
+            color: #666;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        #sendButton {
+            margin-left: 10px;
+            padding: 12px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        #sendButton:hover {
+            background: #45a049;
+        }
+
+        #sendButton:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .error-message {
+            background: #ff6b6b !important;
+            color: white !important;
+        }
+
+        .status {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 480px) {
+            .chat-container {
+                width: 95%;
+                height: 90vh;
+                border-radius: 10px;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            🤖 AI Assistant
+            <div class="status" id="status">Ready to chat!</div>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot-message">
+                Hello! Main aapki AI assistant hun. Kuch bhi puch sakte hain! 😊
+            </div>
+        </div>
+        
+        <div class="typing" id="typing">
+            Bot is typing...
+        </div>
+        
+        <div class="chat-input">
+            <input type="text" id="messageInput" placeholder="Type your message..." maxlength="500">
+            <button id="sendButton">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // Wit.ai API Configuration
+        const WIT_ACCESS_TOKEN = 'EZRV6AO377TRU5BG2ZR5EMXXNQTWDSEJ';
+        const WIT_API_URL = 'https://api.wit.ai/message';
+
+        // DOM Elements
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typing');
+        const status = document.getElementById('status');
+
+        // Event Listeners
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Send Message Function
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Add user message to chat
+            addMessage(message, 'user');
+            
+            // Clear input and disable button
+            messageInput.value = '';
+            sendButton.disabled = true;
+            
+            // Show typing indicator
+            showTyping();
+
+            try {
+                // Get response from Wit.ai
+                const response = await getWitResponse(message);
+                
+                // Hide typing indicator
+                hideTyping();
+                
+                // Process and display bot response
+                const botResponse = processWitResponse(response, message);
+                addMessage(botResponse, 'bot');
+                
+                updateStatus('Message sent successfully');
+                
+            } catch (error) {
+                hideTyping();
+                console.error('Error:', error);
+                addMessage('Sorry, kuch technical problem hai. Thodi der baad try kariye! 😅', 'bot error');
+                updateStatus('Error occurred');
+            }
+
+            // Re-enable button
+            sendButton.disabled = false;
+            messageInput.focus();
+        }
+
+        // Get Response from Wit.ai
+        async function getWitResponse(message) {
+            const url = `${WIT_API_URL}?v=20200513&q=${encodeURIComponent(message)}`;
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${WIT_ACCESS_TOKEN}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        }
+
+        // Process Wit.ai Response
+        function processWitResponse(witResponse, originalMessage) {
+            try {
+                // Check if intents exist
+                if (witResponse.intents && witResponse.intents.length > 0) {
+                    const intent = witResponse.intents[0].name;
+                    const confidence = witResponse.intents[0].confidence;
+
+                    // High confidence responses
+                    if (confidence > 0.8) {
+                        return getIntentResponse(intent, witResponse);
+                    }
+                }
+
+                // Check for entities
+                if (witResponse.entities && Object.keys(witResponse.entities).length > 0) {
+                    return handleEntities(witResponse.entities, originalMessage);
+                }
+
+                // Default responses
+                return getDefaultResponse(originalMessage);
+
+            } catch (error) {
+                console.error('Processing error:', error);
+                return 'Main aapka message samjha nahi. Kya aap thoda aur detail mein bata sakte hain? 🤔';
+            }
+        }
+
+        // Intent-based Responses
+        function getIntentResponse(intent, witResponse) {
+            const responses = {
+                'greetings': [
+                    'Hello! Kaise hain aap? 😊',
+                    'Namaste! Main aapki kaise help kar sakta hun?',
+                    'Hi there! Aaj kaisa din hai?'
+                ],
+                'goodbye': [
+                    'Goodbye! Take care! 👋',
+                    'Bye bye! Phir milte hain!',
+                    'See you later! Have a great day!'
+                ],
+                'thanks': [
+                    'Aapka welcome! 😊',
+                    'Koi baat nahi! Hamesha help ke liye yahan hun.',
+                    'Pleasure! Aur kuch chahiye?'
+                ],
+                'help': [
+                    'Main aapki har tarah se help kar sakta hun! Kya problem hai?',
+                    'Bataiye kya help chahiye? Main yahan hun! 🤝',
+                    'Help ke liye ready hun! Kya question hai?'
+                ],
+                'name': [
+                    'Main aapka AI assistant hun! Aap mujhe kuch bhi naam de sakte hain! 😄',
+                    'Main sirf aapka helpful bot hun. Kya naam pasand hai?'
+                ]
+            };
+
+            const intentResponses = responses[intent];
+            if (intentResponses) {
+                return intentResponses[Math.floor(Math.random() * intentResponses.length)];
+            }
+
+            return 'Interesting! Tell me more about that! 🤔';
+        }
+
+        // Handle Entities
+        function handleEntities(entities, originalMessage) {
+            let response = 'Main dekh raha hun aap ';
+
+            if (entities['wit$location:location']) {
+                const location = entities['wit$location:location'][0].value;
+                response += `${location} ke baare mein puch rahe hain. `;
+            }
+
+            if (entities['wit$datetime:datetime']) {
+                response += 'time/date ke baare mein puch rahe hain. ';
+            }
+
+            response += 'Aur detail mein bata sakte hain? 🤔';
+            return response;
+        }
+
+        // Default Responses
+        function getDefaultResponse(message) {
+            const responses = [
+                'Hmm, interesting! Iske baare mein aur batao? 🤔',
+                'Main samjha nahi bilkul. Thoda simple words mein explain kar sakte hain?',
+                'Ye topic interesting hai! Aur kya jaanna chahte hain?',
+                'Sorry, main abhi ye nahi samjha. Kya aap different way mein puch sakte hain? 😅',
+                'Main still learning hun! Is baare mein aur detail de sakte hain?'
+            ];
+
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        // Add Message to Chat
+        function addMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type === 'user' ? 'user-message' : 'bot-message'}`;
+            if (type.includes('error')) {
+                messageDiv.className += ' error-message';
+            }
+            messageDiv.textContent = message;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Show/Hide Typing Indicator
+        function showTyping() {
+            typingIndicator.style.display = 'block';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+        }
+
+        // Update Status
+        function updateStatus(message) {
+            status.textContent = message;
+            setTimeout(() => {
+                status.textContent = 'Ready to chat!';
+            }, 3000);
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            messageInput.focus();
+            updateStatus('Bot loaded successfully!');
+        });
+
+        // Handle API errors gracefully
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e);
+            updateStatus('Some error occurred');
+        });
+    </script>
+</body>
+</html>
